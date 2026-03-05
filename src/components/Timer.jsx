@@ -1,153 +1,165 @@
-/* Architect: Yuvraj Chopra | DeepDesk Pro */
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { motion } from 'framer-motion';
-import Footer from './Footer.jsx';
+// src/components/Timer.jsx
+/* Built By: Yuvraj Chopra | DeepDesk Minimal */
+import { useEffect, useRef, useState } from "react";
 
-const WORK_DURATION = 25 * 60;
-const BREAK_DURATION = 5 * 60;
+export default function Timer({
+  timeLeft,
+  isRunning,
+  mode,
+  custom,
+  presets,
+  onChange,
+  isMaximized,
+  onMaximize,
+  onMinimize,
+  clock,
+}) {
+  const [displayMode, setDisplayMode] = useState(mode);
 
-function Timer({ onMaximize, isMaximized, onMinimize, index }) {
-    const [timeLeft, setTimeLeft] = useState(WORK_DURATION);
-    const [isRunning, setIsRunning] = useState(false);
-    const [isBreak, setIsBreak] = useState(false);
-    const [sessions, setSessions] = useState(0);
-    const intervalRef = useRef(null);
+  // Sync display mode when mode changes
+  useEffect(() => {
+    setDisplayMode(mode);
+  }, [mode]);
 
-    const totalDuration = isBreak ? BREAK_DURATION : WORK_DURATION;
+  const handlePreset = (preset) => {
+    onChange({
+      mode: preset.label,
+      timeLeft: preset.minutes * 60 + preset.seconds,
+      custom: { minutes: preset.minutes, seconds: preset.seconds },
+      isRunning: false,
+    });
+    setDisplayMode(preset.label);
+  };
 
-    useEffect(() => {
-        if (isRunning && timeLeft > 0) {
-            intervalRef.current = setInterval(() => {
-                setTimeLeft((prev) => prev - 1);
-            }, 1000);
-        }
+  const handleCustom = (e) => {
+    const { name, value } = e.target;
+    const val = Math.max(0, Math.min(59, Number(value) || 0));
+    const newCustom = { ...custom, [name]: val };
+    onChange({
+      mode: "Custom",
+      custom: newCustom,
+      timeLeft: newCustom.minutes * 60 + newCustom.seconds,
+      isRunning: false,
+    });
+    setDisplayMode("Custom");
+  };
 
-        if (timeLeft === 0) {
-            clearInterval(intervalRef.current);
-            if (!isBreak) {
-                setSessions((prev) => prev + 1);
-                setIsBreak(true);
-                setTimeLeft(BREAK_DURATION);
-                setIsRunning(true);
-            } else {
-                setIsBreak(false);
-                setTimeLeft(WORK_DURATION);
-                setIsRunning(false);
-            }
-        }
+  const toggle = () => onChange({ isRunning: !isRunning });
 
-        return () => clearInterval(intervalRef.current);
-    }, [isRunning, timeLeft, isBreak]);
+  const reset = () => {
+    const resetTime =
+      displayMode === "Custom"
+        ? custom.minutes * 60 + custom.seconds
+        : presets.find((p) => p.label === displayMode)?.minutes * 60 +
+          (presets.find((p) => p.label === displayMode)?.seconds || 0);
 
-    const handleStart = useCallback(() => {
-        setIsRunning((prev) => !prev);
-    }, []);
+    onChange({
+      timeLeft: resetTime || timeLeft,
+      isRunning: false,
+    });
+  };
 
-    const handleReset = useCallback(() => {
-        clearInterval(intervalRef.current);
-        setIsRunning(false);
-        setIsBreak(false);
-        setTimeLeft(WORK_DURATION);
-        setSessions(0);
-    }, []);
+  const mm = String(Math.floor(timeLeft / 60)).padStart(2, "0");
+  const ss = String(timeLeft % 60).padStart(2, "0");
 
-    const minutes = String(Math.floor(timeLeft / 60)).padStart(2, '0');
-    const seconds = String(timeLeft % 60).padStart(2, '0');
+  return (
+    <div className={`timer-root${isMaximized ? " timer-max" : ""}`}>
+      {/* Header */}
+      <div className="timer-header">
+        <h2>⏱ Pomodoro Timer</h2>
+        <button
+          className="timer-btn-icon"
+          onClick={isMaximized ? onMinimize : onMaximize}
+          aria-label={isMaximized ? "Minimize" : "Maximize"}
+        >
+          {isMaximized ? "−" : "⤢"}
+        </button>
+      </div>
 
-    const circumference = 2 * Math.PI * 88;
-    const progress = ((totalDuration - timeLeft) / totalDuration) * circumference;
+      {/* Current time display */}
+      {isMaximized && clock && (
+        <div className="timer-current-time">
+          Current time: {clock}
+        </div>
+      )}
 
-    const sessionDots = Array.from({ length: 4 }, (_, i) => i);
+      {/* Preset Buttons */}
+      <div className="timer-presets">
+        {presets.map((p) => (
+          <button
+            key={p.label}
+            className={`timer-preset-btn ${displayMode === p.label ? "active" : ""}`}
+            onClick={() => handlePreset(p)}
+            disabled={isRunning}
+          >
+            {p.label}
+          </button>
+        ))}
+      </div>
 
-    return (
-        <>
-            <motion.section
-                layoutId={!isMaximized ? `timer-${index}` : undefined}
-                className={`card ${isMaximized ? 'card-maximized' : ''}`}
-                id="timer-panel"
-                initial={!isMaximized ? { opacity: 0, y: 20 } : { opacity: 0 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: !isMaximized ? index * 0.1 : 0 }}
-            >
-                <header className="card-header">
-                    <h2 className="card-title">
-                        <span>⏱</span> Pomodoro Timer
-                    </h2>
-                    <div className="card-controls">
-                        <span className={`card-badge ${isBreak ? 'badge-green' : 'badge-cyan'}`}>
-                            {isBreak ? 'Break' : 'Focus'}
-                        </span>
-                        <button
-                            className={`btn-maximize ${isMaximized ? 'hidden' : ''}`}
-                            onClick={onMaximize}
-                            aria-label="Maximize timer"
-                        >
-                            ⛶
-                        </button>
-                        <button
-                            className={`btn-minimize ${!isMaximized ? 'hidden' : ''}`}
-                            onClick={onMinimize}
-                            aria-label="Minimize timer"
-                        >
-                            ⛶
-                        </button>
-                    </div>
-                </header>
+      {/* Custom Mode */}
+      <div className={`timer-custom ${displayMode === "Custom" ? "active" : ""}`}>
+        <div className="custom-inputs">
+          <div className="custom-input-group">
+            <label>Minutes</label>
+            <input
+              type="number"
+              name="minutes"
+              min="0"
+              max="59"
+              value={custom.minutes}
+              onChange={handleCustom}
+              disabled={isRunning}
+              aria-label="Custom Minutes"
+            />
+          </div>
+          <span className="custom-separator">:</span>
+          <div className="custom-input-group">
+            <label>Seconds</label>
+            <input
+              type="number"
+              name="seconds"
+              min="0"
+              max="59"
+              value={custom.seconds}
+              onChange={handleCustom}
+              disabled={isRunning}
+              aria-label="Custom Seconds"
+            />
+          </div>
+        </div>
+      </div>
 
-                <div className={`timer-display ${isMaximized ? 'timer-container-max' : ''}`}>
-                    <div className="timer-ring-container">
-                        <svg className="timer-ring" viewBox="0 0 200 200" preserveAspectRatio="xMidYMid meet">
-                            <circle className="timer-ring-bg" cx="100" cy="100" r="88" />
-                            <circle
-                                className={`timer-ring-progress ${isBreak ? 'break-mode' : ''}`}
-                                cx="100"
-                                cy="100"
-                                r="88"
-                                strokeDasharray={circumference}
-                                strokeDashoffset={circumference - progress}
-                            />
-                        </svg>
-                        <div className="timer-time-display">
-                            <div className="timer-digits">{minutes}:{seconds}</div>
-                            <div className="timer-label">{isBreak ? 'Break Time' : 'Stay Focused'}</div>
-                        </div>
-                    </div>
+      {/* Timer Display */}
+      <div className="timer-display">
+        <div className="timer-digits">{mm}:{ss}</div>
+        <div className="timer-status">
+          {isRunning ? "Running..." : "Paused"}
+        </div>
+      </div>
 
-                    <div className="timer-controls">
-                        <button
-                            className="btn btn-primary"
-                            onClick={handleStart}
-                            aria-label={isRunning ? 'Pause timer' : 'Start timer'}
-                        >
-                            {isRunning ? '⏸ Pause' : '▶ Start'}
-                        </button>
-                        <button
-                            className="btn btn-secondary"
-                            onClick={handleReset}
-                            aria-label="Reset timer"
-                        >
-                            ↻ Reset
-                        </button>
-                    </div>
+      {/* Controls */}
+      <div className="timer-controls">
+        <button
+          className={`timer-btn-main ${isRunning ? "pause" : "play"}`}
+          onClick={toggle}
+          aria-label={isRunning ? "Pause" : "Start"}
+        >
+          {isRunning ? "⏸ Pause" : "▶ Start"}
+        </button>
+        <button
+          className="timer-btn-secondary"
+          onClick={reset}
+          aria-label="Reset"
+        >
+          ↻ Reset
+        </button>
+      </div>
 
-                    <div className="timer-sessions">
-                        <span>Sessions:</span>
-                        {sessionDots.map((i) => (
-                            <span
-                                key={i}
-                                className={`session-dot ${i < sessions ? 'filled' : ''}`}
-                                aria-label={i < sessions ? 'Completed session' : 'Pending session'}
-                            />
-                        ))}
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--fs-xs)' }}>
-                            {sessions}/4
-                        </span>
-                    </div>
-                </div>
-            </motion.section>
-            {isMaximized && <Footer />}
-        </>
-    );
+      {/* Mode indicator */}
+      <div className="timer-mode-indicator">
+        Mode: <strong>{displayMode}</strong>
+      </div>
+    </div>
+  );
 }
-
-export default Timer;

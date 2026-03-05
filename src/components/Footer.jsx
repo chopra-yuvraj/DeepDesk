@@ -1,13 +1,12 @@
-/* Architect: Yuvraj Chopra | DeepDesk Pro */
+// src/components/Footer.jsx
+/* Built By: Yuvraj Chopra | DeepDesk Minimal */
 
 function Footer() {
-    return (
-        <footer className="deepdesk-footer">
-            <div className="footer-neon-brand">
-                <span className="footer-neon-text">Architect: Yuvraj Chopra | DeepDesk Pro</span>
-            </div>
-        </footer>
-    );
+  return (
+    <footer className="deepdesk-footer-standalone">
+      <span>Built by Yuvraj Chopra</span>
+    </footer>
+  );
 }
 
 export default Footer;
