@@ -1,20 +1,19 @@
 // src/components/Whiteboard.jsx
-/* Built By: Yuvraj Chopra | DeepDesk Minimal */
+/* Architect: Yuvraj Chopra | DeepDesk Dynamic */
 import { useRef, useEffect, useState, useCallback } from "react";
+import { motion } from "framer-motion";
 
 export default function Whiteboard({
   canvasData,
   setCanvasData,
   isMaximized,
   onMaximize,
-  onMinimize,
 }) {
   const canvasRef = useRef();
   const [drawing, setDrawing] = useState(false);
   const [color, setColor] = useState("#00f0ff");
   const [size, setSize] = useState(3);
 
-  // Initialize canvas with saved data
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -22,12 +21,10 @@ export default function Whiteboard({
     const ctx = canvas.getContext("2d");
     const dpr = window.devicePixelRatio || 1;
 
-    // Set canvas resolution
     canvas.width = Math.floor(canvas.offsetWidth * dpr);
     canvas.height = Math.floor(canvas.offsetHeight * dpr);
     ctx.scale(dpr, dpr);
 
-    // Restore canvas data if available
     if (canvasData && canvasData.imageData) {
       const imgData = new ImageData(
         new Uint8ClampedArray(canvasData.imageData),
@@ -38,23 +35,19 @@ export default function Whiteboard({
     }
   }, [canvasData, isMaximized]);
 
-  // Handle window resize
   useEffect(() => {
     const handleResize = () => {
       if (!canvasRef.current) return;
       const canvas = canvasRef.current;
       const ctx = canvas.getContext("2d");
 
-      // Save current canvas data
       const dpr = window.devicePixelRatio || 1;
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-      // Resize canvas
       canvas.width = Math.floor(canvas.offsetWidth * dpr);
       canvas.height = Math.floor(canvas.offsetHeight * dpr);
       ctx.scale(dpr, dpr);
 
-      // Restore canvas data
       ctx.putImageData(imageData, 0, 0);
     };
 
@@ -62,7 +55,6 @@ export default function Whiteboard({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Save canvas data when unmounting or on changes
   useEffect(() => {
     return () => {
       if (!canvasRef.current) return;
@@ -86,10 +78,7 @@ export default function Whiteboard({
         (e.touches[0].clientY - rect.top) * dpr,
       ];
     }
-    return [
-      (e.clientX - rect.left) * dpr,
-      (e.clientY - rect.top) * dpr,
-    ];
+    return [(e.clientX - rect.left) * dpr, (e.clientY - rect.top) * dpr];
   };
 
   const startDraw = (e) => {
@@ -140,59 +129,67 @@ export default function Whiteboard({
   };
 
   return (
-    <div className={`whiteboard-root${isMaximized ? " whiteboard-max" : ""}`}>
-      {/* Header */}
-      <div className="whiteboard-header">
-        <h2>🎨 Whiteboard</h2>
-        <button
-          className="whiteboard-btn-icon"
-          onClick={isMaximized ? onMinimize : onMaximize}
-          aria-label={isMaximized ? "Minimize" : "Maximize"}
-        >
-          {isMaximized ? "−" : "⤢"}
-        </button>
+    <motion.div
+      className={`whiteboard-container ${isMaximized ? "whiteboard-maximized" : ""}`}
+      initial={!isMaximized ? { opacity: 0 } : false}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
+      <div className="whiteboard-header-section">
+        <h2 className="whiteboard-title">🎨 Whiteboard</h2>
+        {!isMaximized && (
+          <button
+            className="whiteboard-expand-btn"
+            onClick={onMaximize}
+            aria-label="Expand whiteboard"
+          >
+            ⤢
+          </button>
+        )}
       </div>
 
-      {/* Toolbar */}
-      <div className="whiteboard-toolbar">
-        <div className="toolbar-group">
-          <label htmlFor="color-picker">Color</label>
-          <input
-            id="color-picker"
+      <div className="whiteboard-toolbar-section">
+        <div className="whiteboard-control-group">
+          <label htmlFor="wb-color">Color</label>
+          <motion.input
+            id="wb-color"
             type="color"
             value={color}
             onChange={(e) => setColor(e.target.value)}
-            aria-label="Brush Color"
-            className="color-picker"
+            whileHover={{ scale: 1.1 }}
+            className="whiteboard-color-picker"
           />
         </div>
 
-        <div className="toolbar-group">
-          <label htmlFor="size-slider">Size: {size}px</label>
-          <input
-            id="size-slider"
+        <div className="whiteboard-control-group">
+          <label htmlFor="wb-size">Size: {size}px</label>
+          <motion.input
+            id="wb-size"
             type="range"
             min="1"
             max="20"
             value={size}
             onChange={(e) => setSize(Number(e.target.value))}
-            aria-label="Brush Size"
-            className="size-slider"
+            className="whiteboard-size-slider"
           />
         </div>
 
-        <button className="whiteboard-btn-clear" onClick={clear} aria-label="Clear">
+        <motion.button
+          className="whiteboard-clear-btn"
+          onClick={clear}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
           🗑 Clear
-        </button>
+        </motion.button>
       </div>
 
-      {/* Canvas */}
-      <div className="whiteboard-canvas-wrap">
+      <div className="whiteboard-canvas-container">
         <canvas
           ref={canvasRef}
-          className="whiteboard-canvas"
-          width={isMaximized ? 1200 : 400}
-          height={isMaximized ? 700 : 250}
+          className="whiteboard-canvas-element"
+          width={isMaximized ? 1600 : 400}
+          height={isMaximized ? 800 : 250}
           onMouseDown={startDraw}
           onMouseMove={draw}
           onMouseUp={endDraw}
@@ -202,6 +199,6 @@ export default function Whiteboard({
           onTouchEnd={endDraw}
         />
       </div>
-    </div>
+    </motion.div>
   );
 }

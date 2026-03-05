@@ -1,6 +1,7 @@
 // src/components/Timer.jsx
-/* Built By: Yuvraj Chopra | DeepDesk Minimal */
-import { useEffect, useRef, useState } from "react";
+/* Architect: Yuvraj Chopra | DeepDesk Dynamic */
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 
 export default function Timer({
   timeLeft,
@@ -11,12 +12,9 @@ export default function Timer({
   onChange,
   isMaximized,
   onMaximize,
-  onMinimize,
-  clock,
 }) {
   const [displayMode, setDisplayMode] = useState(mode);
 
-  // Sync display mode when mode changes
   useEffect(() => {
     setDisplayMode(mode);
   }, [mode]);
@@ -53,68 +51,71 @@ export default function Timer({
         : presets.find((p) => p.label === displayMode)?.minutes * 60 +
           (presets.find((p) => p.label === displayMode)?.seconds || 0);
 
-    onChange({
-      timeLeft: resetTime || timeLeft,
-      isRunning: false,
-    });
+    onChange({ timeLeft: resetTime || timeLeft, isRunning: false });
   };
 
   const mm = String(Math.floor(timeLeft / 60)).padStart(2, "0");
   const ss = String(timeLeft % 60).padStart(2, "0");
 
   return (
-    <div className={`timer-root${isMaximized ? " timer-max" : ""}`}>
-      {/* Header */}
-      <div className="timer-header">
-        <h2>⏱ Pomodoro Timer</h2>
-        <button
-          className="timer-btn-icon"
-          onClick={isMaximized ? onMinimize : onMaximize}
-          aria-label={isMaximized ? "Minimize" : "Maximize"}
-        >
-          {isMaximized ? "−" : "⤢"}
-        </button>
+    <motion.div
+      className={`timer-container ${isMaximized ? "timer-maximized" : ""}`}
+      initial={!isMaximized ? { opacity: 0 } : false}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
+      <div className="timer-header-section">
+        <h2 className="timer-title">⏱ Pomodoro</h2>
+        {!isMaximized && (
+          <button
+            className="timer-expand-btn"
+            onClick={onMaximize}
+            aria-label="Expand timer"
+          >
+            ⤢
+          </button>
+        )}
       </div>
 
-      {/* Current time display */}
-      {isMaximized && clock && (
-        <div className="timer-current-time">
-          Current time: {clock}
-        </div>
-      )}
-
-      {/* Preset Buttons */}
-      <div className="timer-presets">
-        {presets.map((p) => (
-          <button
-            key={p.label}
-            className={`timer-preset-btn ${displayMode === p.label ? "active" : ""}`}
-            onClick={() => handlePreset(p)}
+      <div className="timer-presets-grid">
+        {presets.map((preset) => (
+          <motion.button
+            key={preset.label}
+            className={`timer-preset ${displayMode === preset.label ? "active" : ""}`}
+            onClick={() => handlePreset(preset)}
             disabled={isRunning}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.98 }}
           >
-            {p.label}
-          </button>
+            {preset.label}
+          </motion.button>
         ))}
       </div>
 
-      {/* Custom Mode */}
-      <div className={`timer-custom ${displayMode === "Custom" ? "active" : ""}`}>
-        <div className="custom-inputs">
-          <div className="custom-input-group">
+      <motion.div
+        className={`timer-custom-input-section ${displayMode === "Custom" ? "visible" : ""}`}
+        initial={false}
+        animate={{
+          maxHeight: displayMode === "Custom" ? 100 : 0,
+          opacity: displayMode === "Custom" ? 1 : 0,
+        }}
+        transition={{ duration: 0.3 }}
+      >
+        <div className="timer-custom-inputs">
+          <div className="timer-input-group">
             <label>Minutes</label>
             <input
               type="number"
               name="minutes"
               min="0"
-              max="59"
+              max="99"
               value={custom.minutes}
               onChange={handleCustom}
               disabled={isRunning}
-              aria-label="Custom Minutes"
             />
           </div>
-          <span className="custom-separator">:</span>
-          <div className="custom-input-group">
+          <span className="timer-input-separator">:</span>
+          <div className="timer-input-group">
             <label>Seconds</label>
             <input
               type="number"
@@ -124,42 +125,49 @@ export default function Timer({
               value={custom.seconds}
               onChange={handleCustom}
               disabled={isRunning}
-              aria-label="Custom Seconds"
             />
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Timer Display */}
-      <div className="timer-display">
-        <div className="timer-digits">{mm}:{ss}</div>
-        <div className="timer-status">
-          {isRunning ? "Running..." : "Paused"}
+      <motion.div
+        className="timer-display-section"
+        initial={false}
+        animate={{ scale: isMaximized ? 1.3 : 1 }}
+        transition={{ duration: 0.4 }}
+      >
+        <div className="timer-time-display">
+          <span className="timer-digits">{mm}:{ss}</span>
+          <motion.div
+            className="timer-indicator"
+            animate={isRunning ? { opacity: [1, 0.5, 1] } : { opacity: 1 }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          >
+            {isRunning ? "Running" : "Paused"}
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Controls */}
-      <div className="timer-controls">
-        <button
-          className={`timer-btn-main ${isRunning ? "pause" : "play"}`}
+      <div className="timer-controls-section">
+        <motion.button
+          className={`timer-btn-play ${isRunning ? "pause" : "play"}`}
           onClick={toggle}
-          aria-label={isRunning ? "Pause" : "Start"}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
           {isRunning ? "⏸ Pause" : "▶ Start"}
-        </button>
-        <button
-          className="timer-btn-secondary"
+        </motion.button>
+        <motion.button
+          className="timer-btn-reset"
           onClick={reset}
-          aria-label="Reset"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
           ↻ Reset
-        </button>
+        </motion.button>
       </div>
 
-      {/* Mode indicator */}
-      <div className="timer-mode-indicator">
-        Mode: <strong>{displayMode}</strong>
-      </div>
-    </div>
+      <div className="timer-mode-tag">{displayMode}</div>
+    </motion.div>
   );
 }
