@@ -180,11 +180,8 @@ body {
   background: var(--bg-primary);
   border: none;
   border-radius: 0;
-  padding: 2rem;
-  overflow-y: auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  overflow: hidden;
+  display: block;
 }
 
 .maximize-close-btn {
@@ -762,6 +759,297 @@ body {
 .deepdesk-footer:hover .footer-text {
   color: var(--accent-cyan);
   text-shadow: 0 0 12px rgba(0, 240, 255, 0.3);
+}
+
+/* EXPERIMENT LOGGER */
+.experiment-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  height: 100%;
+}
+
+.experiment-maximized {
+  position: fixed;
+  inset: 0;
+  padding: 3rem;
+  background: var(--bg-primary);
+  justify-content: flex-start;
+  overflow-y: auto;
+}
+
+.experiment-header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.experiment-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.experiment-expand-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--accent-cyan);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  font-size: 16px;
+}
+
+.experiment-expand-btn:hover {
+  background: rgba(0, 240, 255, 0.1);
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.3);
+}
+
+.experiment-input-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.experiment-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.experiment-input-group label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.experiment-input,
+.experiment-select {
+  padding: 8px 12px;
+  background: rgba(0, 240, 255, 0.04);
+  border: 1px solid var(--border-medium);
+  color: var(--text-primary);
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.experiment-input:focus,
+.experiment-select:focus {
+  outline: none;
+  border-color: var(--accent-cyan);
+  background: rgba(0, 240, 255, 0.1);
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.2);
+}
+
+.experiment-textarea-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 1rem;
+}
+
+.experiment-textarea-group label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.experiment-textarea {
+  padding: 10px 12px;
+  background: rgba(0, 240, 255, 0.04);
+  border: 1px solid var(--border-medium);
+  color: var(--text-primary);
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  resize: vertical;
+  transition: all 0.2s;
+}
+
+.experiment-textarea:focus {
+  outline: none;
+  border-color: var(--accent-cyan);
+  background: rgba(0, 240, 255, 0.1);
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.2);
+}
+
+.experiment-button-group {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 1rem;
+}
+
+.experiment-add-btn,
+.experiment-clear-btn {
+  padding: 10px 16px;
+  border: 1px solid var(--border-medium);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.experiment-add-btn {
+  background: rgba(0, 240, 255, 0.1);
+  color: var(--accent-cyan);
+  border-color: rgba(0, 240, 255, 0.3);
+  flex: 1;
+}
+
+.experiment-add-btn:hover {
+  background: var(--accent-cyan);
+  color: var(--bg-primary);
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+}
+
+.experiment-clear-btn {
+  background: rgba(255, 80, 80, 0.1);
+  color: #ff6b6b;
+  border-color: rgba(255, 80, 80, 0.3);
+}
+
+.experiment-clear-btn:hover {
+  background: rgba(255, 80, 80, 0.2);
+  border-color: #ff6b6b;
+  box-shadow: 0 0 16px rgba(255, 80, 80, 0.3);
+}
+
+.experiment-logs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: 500px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.experiment-log-item {
+  padding: 1rem;
+  background: rgba(0, 240, 255, 0.05);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  border-left: 3px solid var(--accent-cyan);
+  transition: all 0.2s;
+}
+
+.experiment-log-item.category-hypothesis {
+  border-left-color: #ffa31a;
+}
+
+.experiment-log-item.category-result {
+  border-left-color: #4caf50;
+}
+
+.experiment-log-item.category-insight {
+  border-left-color: #9c27b0;
+}
+
+.experiment-log-item.category-note {
+  border-left-color: #2196f3;
+}
+
+.experiment-log-item:hover {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 16px rgba(0, 240, 255, 0.1);
+}
+
+.experiment-log-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.experiment-log-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.experiment-log-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.experiment-category-tag {
+  display: inline-block;
+  padding: 4px 8px;
+  background: rgba(0, 240, 255, 0.15);
+  color: var(--accent-cyan);
+  border-radius: 4px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.experiment-category-tag.category-hypothesis {
+  background: rgba(255, 163, 26, 0.15);
+  color: #ffa31a;
+}
+
+.experiment-category-tag.category-result {
+  background: rgba(76, 175, 80, 0.15);
+  color: #4caf50;
+}
+
+.experiment-category-tag.category-insight {
+  background: rgba(156, 39, 176, 0.15);
+  color: #9c27b0;
+}
+
+.experiment-category-tag.category-note {
+  background: rgba(33, 150, 243, 0.15);
+  color: #2196f3;
+}
+
+.experiment-log-notes {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 8px 0 0 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.experiment-log-delete {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  background: rgba(255, 80, 80, 0.1);
+  border: 1px solid rgba(255, 80, 80, 0.3);
+  color: #ff6b6b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.experiment-log-delete:hover {
+  background: rgba(255, 80, 80, 0.3);
+  border-color: #ff6b6b;
+  box-shadow: 0 0 12px rgba(255, 80, 80, 0.3);
 }
 
 /* VISION BOARD */
