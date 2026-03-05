@@ -1,10 +1,10 @@
-/* Developed by Yuvraj Chopra | DeepDesk Hub */
+/* Architect: Yuvraj Chopra | DeepDesk Pro */
 
 function Footer() {
     return (
         <footer className="deepdesk-footer">
-            <div className="footer-neon-brand" id="footer-brand">
-                <span className="footer-neon-text">Built by Yuvraj Chopra</span>
+            <div className="footer-neon-brand">
+                <span className="footer-neon-text">Architect: Yuvraj Chopra | DeepDesk Pro</span>
             </div>
         </footer>
     );

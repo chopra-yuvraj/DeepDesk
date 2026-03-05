@@ -1,91 +1,116 @@
-/* Developed by Yuvraj Chopra | DeepDesk Hub */
-import { useState, useCallback } from 'react';
+/* Architect: Yuvraj Chopra | DeepDesk Pro */
+import { useState, useCallback, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Timer from './components/Timer.jsx';
 import TaskManager from './components/TaskManager.jsx';
-import ExperimentLogger from './components/ExperimentLogger.jsx';
 import Whiteboard from './components/Whiteboard.jsx';
+import Soundscape from './components/Soundscape.jsx';
+import VisionBoard from './components/VisionBoard.jsx';
 import Footer from './components/Footer.jsx';
 
-const NAV_ITEMS = [
-    { id: 'all', label: '🏠 All Panels' },
-    { id: 'timer', label: '⏱ Timer' },
-    { id: 'tasks', label: '📋 Tasks' },
-    { id: 'logger', label: '🔬 Logger' },
-    { id: 'whiteboard', label: '🎨 Whiteboard' },
+const GRID_CARDS = [
+    { id: 'timer', label: '⏱ Timer', icon: '⏱' },
+    { id: 'tasks', label: '📋 Tasks', icon: '📋' },
+    { id: 'soundscape', label: '🎵 Soundscape', icon: '🎵' },
+    { id: 'whiteboard', label: '🎨 Whiteboard', icon: '🎨' },
+    { id: 'visionboard', label: '🎯 Vision Board', icon: '🎯' },
 ];
 
-/* ---------- Theming Engine ---------- */
-function toggleTheme(setIsDark) {
-    setIsDark((prev) => {
-        const next = !prev;
-        if (next) {
-            document.documentElement.classList.remove('light-theme');
-        } else {
-            document.documentElement.classList.add('light-theme');
-        }
-        return next;
-    });
-}
-
 function App() {
-    const [activePanel, setActivePanel] = useState('all');
     const [isDark, setIsDark] = useState(true);
+    const [maximizedComponent, setMaximizedComponent] = useState(null);
+    const canvasDataRef = useRef(null);
 
     const handleThemeToggle = useCallback(() => {
-        toggleTheme(setIsDark);
+        setIsDark((prev) => {
+            const next = !prev;
+            if (next) {
+                document.documentElement.classList.remove('light-theme');
+            } else {
+                document.documentElement.classList.add('light-theme');
+            }
+            return next;
+        });
     }, []);
 
-    const showPanel = (id) => activePanel === 'all' || activePanel === id;
-
     return (
-        <>
-            {/* ─── Navigation ─── */}
-            <nav className="deepdesk-nav" aria-label="Main navigation">
-                <div className="nav-brand">
-                    <div className="nav-brand-icon" aria-hidden="true">D</div>
-                    <span className="nav-brand-text">DeepDesk</span>
-                </div>
-
-                <ul className="nav-links" role="menubar">
-                    {NAV_ITEMS.map((item) => (
-                        <li key={item.id} role="none">
+        <div className="deepdesk-container">
+            {/* ─── Grid Hub Layout ─── */}
+            <AnimatePresence mode="wait">
+                {!maximizedComponent && (
+                    <motion.main
+                        key="hub"
+                        className="deepdesk-grid-hub"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                    >
+                        <div className="hub-header">
+                            <div className="hub-brand">
+                                <motion.div
+                                    className="hub-brand-icon"
+                                    animate={{ scale: [1, 1.05, 1] }}
+                                    transition={{ duration: 2, repeat: Infinity }}
+                                >
+                                    D
+                                </motion.div>
+                                <span className="hub-brand-text">DeepDesk Pro</span>
+                            </div>
                             <button
-                                className={`nav-link-btn ${activePanel === item.id ? 'active' : ''}`}
-                                onClick={() => setActivePanel(item.id)}
-                                role="menuitem"
-                                id={`nav-${item.id}`}
-                                aria-current={activePanel === item.id ? 'page' : undefined}
+                                className="theme-toggle-btn"
+                                onClick={handleThemeToggle}
+                                aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
                             >
-                                {item.label}
+                                {isDark ? '☀️' : '🌙'}
                             </button>
-                        </li>
-                    ))}
-                </ul>
+                        </div>
 
-                <button
-                    className="theme-toggle-btn"
-                    onClick={handleThemeToggle}
-                    id="theme-toggle-btn"
-                    aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
-                    title={isDark ? 'Light mode' : 'Dark mode'}
-                >
-                    {isDark ? '☀️' : '🌙'}
-                </button>
-            </nav>
+                        <div className="panel-grid">
+                            {GRID_CARDS.map((card, index) => {
+                                const componentMap = {
+                                    timer: <Timer onMaximize={() => setMaximizedComponent('timer')} canvasDataRef={canvasDataRef} index={index} />,
+                                    tasks: <TaskManager onMaximize={() => setMaximizedComponent('tasks')} index={index} />,
+                                    soundscape: <Soundscape onMaximize={() => setMaximizedComponent('soundscape')} index={index} />,
+                                    whiteboard: <Whiteboard onMaximize={() => setMaximizedComponent('whiteboard')} canvasDataRef={canvasDataRef} index={index} />,
+                                    visionboard: <VisionBoard onMaximize={() => setMaximizedComponent('visionboard')} index={index} />,
+                                };
+                                return componentMap[card.id];
+                            })}
+                        </div>
+                        <Footer />
+                    </motion.main>
+                )}
+            </AnimatePresence>
 
-            {/* ─── Main Content ─── */}
-            <main className="deepdesk-main">
-                <div className="panel-grid">
-                    {showPanel('timer') && <Timer />}
-                    {showPanel('tasks') && <TaskManager />}
-                    {showPanel('logger') && <ExperimentLogger />}
-                    {showPanel('whiteboard') && <Whiteboard />}
-                </div>
-            </main>
-
-            {/* ─── Footer ─── */}
-            <Footer />
-        </>
+            {/* ─── Maximized Views ─── */}
+            <AnimatePresence mode="wait">
+                {maximizedComponent === 'timer' && (
+                    <motion.div key="timer-max" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                        <Timer isMaximized onMinimize={() => setMaximizedComponent(null)} canvasDataRef={canvasDataRef} />
+                    </motion.div>
+                )}
+                {maximizedComponent === 'tasks' && (
+                    <motion.div key="tasks-max" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                        <TaskManager isMaximized onMinimize={() => setMaximizedComponent(null)} />
+                    </motion.div>
+                )}
+                {maximizedComponent === 'soundscape' && (
+                    <motion.div key="sound-max" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                        <Soundscape isMaximized onMinimize={() => setMaximizedComponent(null)} />
+                    </motion.div>
+                )}
+                {maximizedComponent === 'whiteboard' && (
+                    <motion.div key="wb-max" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                        <Whiteboard isMaximized onMinimize={() => setMaximizedComponent(null)} canvasDataRef={canvasDataRef} />
+                    </motion.div>
+                )}
+                {maximizedComponent === 'visionboard' && (
+                    <motion.div key="vb-max" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                        <VisionBoard isMaximized onMinimize={() => setMaximizedComponent(null)} />
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
     );
 }
 

@@ -1,54 +1,61 @@
-/* Developed by Yuvraj Chopra | DeepDesk Hub */
+/* Architect: Yuvraj Chopra | DeepDesk Pro */
 import { useRef, useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
+import Footer from './Footer.jsx';
 
-function Whiteboard() {
+function Whiteboard({ onMaximize, isMaximized, onMinimize, canvasDataRef, index }) {
     const canvasRef = useRef(null);
     const ctxRef = useRef(null);
     const [isDrawing, setIsDrawing] = useState(false);
     const [strokeColor, setStrokeColor] = useState('#00f0ff');
     const [brushSize, setBrushSize] = useState(3);
 
-    useEffect(() => {
+    const initializeCanvas = useCallback(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
 
-        const resizeCanvas = () => {
-            const rect = canvas.parentElement.getBoundingClientRect();
-            const dpr = window.devicePixelRatio || 1;
+        const parentRect = canvas.parentElement.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
 
-            const imageData = ctxRef.current
-                ? ctxRef.current.getImageData(0, 0, canvas.width, canvas.height)
-                : null;
+        if (isMaximized) {
+            canvas.width = window.innerWidth * dpr;
+            canvas.height = (window.innerHeight - 60) * dpr;
+        } else {
+            canvas.width = parentRect.width * dpr;
+            canvas.height = 280 * dpr;
+        }
 
-            canvas.width = rect.width * dpr;
-            canvas.height = 350 * dpr;
-            canvas.style.height = '350px';
+        const ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctxRef.current = ctx;
 
-            const ctx = canvas.getContext('2d');
-            ctx.scale(dpr, dpr);
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-            ctxRef.current = ctx;
+        if (canvasDataRef?.current?.imageData) {
+            ctx.putImageData(canvasDataRef.current.imageData, 0, 0);
+        }
+    }, [isMaximized, canvasDataRef]);
 
-            if (imageData) {
-                ctx.putImageData(imageData, 0, 0);
-            }
-        };
+    useEffect(() => {
+        initializeCanvas();
+        window.addEventListener('resize', initializeCanvas);
+        return () => window.removeEventListener('resize', initializeCanvas);
+    }, [initializeCanvas]);
 
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
-        return () => window.removeEventListener('resize', resizeCanvas);
-    }, []);
+    const captureCanvasData = useCallback(() => {
+        if (ctxRef.current && canvasRef.current && canvasDataRef) {
+            canvasDataRef.current = {
+                imageData: ctxRef.current.getImageData(0, 0, canvasRef.current.width, canvasRef.current.height),
+            };
+        }
+    }, [canvasDataRef]);
 
     const getPointerPos = useCallback((e) => {
         const canvas = canvasRef.current;
         const rect = canvas.getBoundingClientRect();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        return {
-            x: clientX - rect.left,
-            y: clientY - rect.top,
-        };
+        return { x: clientX - rect.left, y: clientY - rect.top };
     }, []);
 
     const handleMouseDown = useCallback(
@@ -81,100 +88,121 @@ function Whiteboard() {
 
     const handleMouseUp = useCallback(() => {
         setIsDrawing(false);
-        if (ctxRef.current) {
-            ctxRef.current.closePath();
-        }
-    }, []);
+        if (ctxRef.current) ctxRef.current.closePath();
+        captureCanvasData();
+    }, [captureCanvasData]);
 
     const handleClear = useCallback(() => {
         const canvas = canvasRef.current;
         const ctx = ctxRef.current;
         if (!canvas || !ctx) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-    }, []);
+        if (canvasDataRef) canvasDataRef.current = null;
+    }, [canvasDataRef]);
 
     const presetColors = ['#00f0ff', '#00ff88', '#a855f7', '#ff6b35', '#ff3b5c', '#ffd700', '#ffffff'];
 
     return (
-        <section className="card" id="whiteboard-panel" aria-label="Architecture Whiteboard">
-            <header className="card-header">
-                <h2 className="card-title">
-                    <span className="icon">🎨</span> Whiteboard
-                </h2>
-                <span className="card-badge badge-orange">Canvas</span>
-            </header>
-
-            <div className="whiteboard-container">
-                <div className="whiteboard-toolbar">
-                    <label htmlFor="wb-color-picker">Color</label>
-                    <input
-                        type="color"
-                        className="color-picker"
-                        id="wb-color-picker"
-                        value={strokeColor}
-                        onChange={(e) => setStrokeColor(e.target.value)}
-                    />
-                    {presetColors.map((color) => (
+        <>
+            <motion.section
+                layoutId={!isMaximized ? `whiteboard-${index}` : undefined}
+                className={`card ${isMaximized ? 'card-maximized' : ''}`}
+                id="whiteboard-panel"
+                initial={!isMaximized ? { opacity: 0, y: 20 } : { opacity: 0 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: !isMaximized ? index * 0.1 : 0 }}
+            >
+                <header className="card-header">
+                    <h2 className="card-title">
+                        <span>🎨</span> Architecture Whiteboard
+                    </h2>
+                    <div className="card-controls">
+                        <span className="card-badge badge-orange">Canvas</span>
                         <button
-                            key={color}
-                            className="btn-icon"
-                            onClick={() => setStrokeColor(color)}
-                            aria-label={`Set color to ${color}`}
-                            style={{
-                                width: '24px',
-                                height: '24px',
-                                minWidth: '24px',
-                                minHeight: '24px',
-                                borderRadius: '50%',
-                                background: color,
-                                border: strokeColor === color ? '2px solid var(--text-primary)' : '2px solid var(--border-default)',
-                                cursor: 'pointer',
-                                padding: 0,
-                                boxShadow: strokeColor === color ? `0 0 8px ${color}` : 'none',
-                                transition: 'all 150ms ease',
-                            }}
+                            className={`btn-maximize ${isMaximized ? 'hidden' : ''}`}
+                            onClick={() => { captureCanvasData(); onMaximize(); }}
+                            aria-label="Maximize whiteboard"
+                        >
+                            ⛶
+                        </button>
+                        <button
+                            className={`btn-minimize ${!isMaximized ? 'hidden' : ''}`}
+                            onClick={() => { captureCanvasData(); onMinimize(); }}
+                            aria-label="Minimize whiteboard"
+                        >
+                            ⛶
+                        </button>
+                    </div>
+                </header>
+
+                <div className={`whiteboard-container ${isMaximized ? 'whiteboard-container-max' : ''}`}>
+                    <div className="whiteboard-toolbar">
+                        <label htmlFor="wb-color-picker">Color</label>
+                        <input
+                            type="color"
+                            className="color-picker"
+                            id="wb-color-picker"
+                            value={strokeColor}
+                            onChange={(e) => setStrokeColor(e.target.value)}
                         />
-                    ))}
+                        {presetColors.map((color) => (
+                            <button
+                                key={color}
+                                className="btn-icon"
+                                onClick={() => setStrokeColor(color)}
+                                style={{
+                                    width: '24px',
+                                    height: '24px',
+                                    borderRadius: '50%',
+                                    background: color,
+                                    border: strokeColor === color ? '2px solid var(--text-primary)' : '2px solid var(--border-default)',
+                                    cursor: 'pointer',
+                                    padding: 0,
+                                    boxShadow: strokeColor === color ? `0 0 8px ${color}` : 'none',
+                                    transition: 'all 150ms ease',
+                                }}
+                            />
+                        ))}
 
-                    <label htmlFor="wb-brush-size" style={{ marginLeft: 'auto' }}>
-                        Size: {brushSize}px
-                    </label>
-                    <input
-                        type="range"
-                        className="brush-size-slider"
-                        id="wb-brush-size"
-                        min="1"
-                        max="20"
-                        value={brushSize}
-                        onChange={(e) => setBrushSize(Number(e.target.value))}
-                    />
+                        <label htmlFor="wb-brush-size" style={{ marginLeft: 'auto' }}>
+                            Size: {brushSize}px
+                        </label>
+                        <input
+                            type="range"
+                            className="brush-size-slider"
+                            id="wb-brush-size"
+                            min="1"
+                            max="20"
+                            value={brushSize}
+                            onChange={(e) => setBrushSize(Number(e.target.value))}
+                        />
 
-                    <button
-                        className="btn btn-danger btn-icon"
-                        onClick={handleClear}
-                        id="wb-clear-btn"
-                        aria-label="Clear canvas"
-                        title="Clear canvas"
-                    >
-                        🗑
-                    </button>
+                        <button
+                            className="btn btn-danger btn-icon"
+                            onClick={handleClear}
+                            aria-label="Clear canvas"
+                        >
+                            🗑
+                        </button>
+                    </div>
+
+                    <div className="canvas-wrapper">
+                        <canvas
+                            ref={canvasRef}
+                            className="whiteboard-canvas"
+                            onMouseDown={handleMouseDown}
+                            onMouseMove={handleMouseMove}
+                            onMouseUp={handleMouseUp}
+                            onMouseLeave={handleMouseUp}
+                            onTouchStart={handleMouseDown}
+                            onTouchMove={handleMouseMove}
+                            onTouchEnd={handleMouseUp}
+                        />
+                    </div>
                 </div>
-
-                <div className="canvas-wrapper">
-                    <canvas
-                        ref={canvasRef}
-                        className="whiteboard-canvas"
-                        onMouseDown={handleMouseDown}
-                        onMouseMove={handleMouseMove}
-                        onMouseUp={handleMouseUp}
-                        onMouseLeave={handleMouseUp}
-                        onTouchStart={handleMouseDown}
-                        onTouchMove={handleMouseMove}
-                        onTouchEnd={handleMouseUp}
-                    />
-                </div>
-            </div>
-        </section>
+            </motion.section>
+            {isMaximized && <Footer />}
+        </>
     );
 }
 
