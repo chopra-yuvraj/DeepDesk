@@ -6,6 +6,7 @@ import Timer from "./components/Timer.jsx";
 import TaskManager from "./components/TaskManager.jsx";
 import Whiteboard from "./components/Whiteboard.jsx";
 import VisionBoard from "./components/VisionBoard.jsx";
+import ExperimentLogger from "./components/ExperimentLogger.jsx";
 import FloatingSoundscape from "./components/FloatingSoundscape.jsx";
 
 const POMODORO_PRESETS = [
@@ -17,6 +18,7 @@ const POMODORO_PRESETS = [
 const GRID_CARDS = [
   { id: "timer", label: "⏱ Timer" },
   { id: "tasks", label: "📋 Tasks" },
+  { id: "experiments", label: "📝 Experiments" },
   { id: "whiteboard", label: "🎨 Whiteboard" },
   { id: "visionboard", label: "🎯 Vision Board" },
 ];
@@ -179,6 +181,12 @@ export default function App() {
                       onMaximize={() => setMaximized("visionboard")}
                     />
                   )}
+                  {card.id === "experiments" && (
+                    <ExperimentLogger
+                      isMaximized={false}
+                      onMaximize={() => setMaximized("experiments")}
+                    />
+                  )}
                 </motion.section>
               ))}
             </>
@@ -234,6 +242,12 @@ export default function App() {
                 <VisionBoard
                   images={visionImages}
                   setImages={setVisionImages}
+                  isMaximized={true}
+                  onMaximize={() => {}}
+                />
+              )}
+              {maximized === "experiments" && (
+                <ExperimentLogger
                   isMaximized={true}
                   onMaximize={() => {}}
                 />
