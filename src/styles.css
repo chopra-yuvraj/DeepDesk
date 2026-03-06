@@ -138,10 +138,6 @@ body {
   align-content: start;
 }
 
-.panel-grid.grid-maximized {
-  display: none;
-}
-
 .card {
   background: var(--bg-secondary);
   border: 1px solid var(--border-light);
