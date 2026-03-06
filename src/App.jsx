@@ -142,8 +142,6 @@ export default function App() {
                     layout: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
                     hover: { duration: 0.2 },
                   }}
-                  onClick={() => setMaximized(card.id)}
-                  style={{ cursor: "pointer" }}
                 >
                   {card.id === "timer" && (
                     <Timer
