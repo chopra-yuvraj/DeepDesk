@@ -136,7 +136,7 @@ export default function Whiteboard({
       transition={{ duration: 0.3 }}
     >
       <div className="whiteboard-header-section">
-        <h2 className="whiteboard-title">🎨 Whiteboard</h2>
+        <h2 className="whiteboard-title">Whiteboard</h2>
         {!isMaximized && (
           <button
             className="whiteboard-expand-btn"
@@ -180,7 +180,7 @@ export default function Whiteboard({
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          🗑 Clear
+          Clear
         </motion.button>
       </div>
 

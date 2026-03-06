@@ -64,7 +64,7 @@ export default function ExperimentLogger({
       transition={{ duration: 0.3 }}
     >
       <div className="experiment-header-section">
-        <h2 className="experiment-title">📝 Experiment Logger</h2>
+        <h2 className="experiment-title">Experiment Logger</h2>
         {!isMaximized && (
           <button
             className="experiment-expand-btn"
@@ -98,11 +98,11 @@ export default function ExperimentLogger({
             onChange={(e) => setCategory(e.target.value)}
             className="experiment-select"
           >
-            <option value="observation">🔍 Observation</option>
-            <option value="hypothesis">💡 Hypothesis</option>
-            <option value="result">✓ Result</option>
-            <option value="insight">⚡ Insight</option>
-            <option value="note">📌 Note</option>
+            <option value="observation">Observation</option>
+            <option value="hypothesis">Hypothesis</option>
+            <option value="result">Result</option>
+            <option value="insight">Insight</option>
+            <option value="note">Note</option>
           </select>
         </div>
       </div>

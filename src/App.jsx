@@ -16,11 +16,11 @@ const POMODORO_PRESETS = [
 ];
 
 const GRID_CARDS = [
-  { id: "timer", label: "⏱ Timer" },
-  { id: "tasks", label: "📋 Tasks" },
-  { id: "experiments", label: "📝 Experiments" },
-  { id: "whiteboard", label: "🎨 Whiteboard" },
-  { id: "visionboard", label: "🎯 Vision Board" },
+  { id: "timer", label: "Timer" },
+  { id: "tasks", label: "Tasks" },
+  { id: "experiments", label: "Experiments" },
+  { id: "whiteboard", label: "Whiteboard" },
+  { id: "visionboard", label: "Vision Board" },
 ];
 
 function getClock() {

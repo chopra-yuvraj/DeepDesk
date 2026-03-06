@@ -58,7 +58,7 @@ export default function VisionBoard({
       transition={{ duration: 0.3 }}
     >
       <div className="visionboard-header-section">
-        <h2 className="visionboard-title">🎯 Vision Board</h2>
+        <h2 className="visionboard-title">Vision Board</h2>
         {!isMaximized && (
           <button
             className="visionboard-expand-btn"
@@ -72,12 +72,9 @@ export default function VisionBoard({
 
       <div className="visionboard-dropzone" ref={dropZoneRef} onDragOver={handleDragOver} onDrop={handleDrop}>
         <div className="visionboard-dropzone-content">
-          <span style={{ fontSize: "32px", display: "block", marginBottom: "8px" }}>
-            📸
-          </span>
-          <p>Drag images here</p>
+          <p>Drag and drop images here</p>
           <span style={{ fontSize: "12px", opacity: 0.6 }}>
-            Drop to add to vision board
+            or click to select files
           </span>
         </div>
       </div>

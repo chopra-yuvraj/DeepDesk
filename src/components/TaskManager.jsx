@@ -1,7 +1,6 @@
 /* Architect: Yuvraj Chopra | DeepDesk Pro */
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import Footer from './Footer.jsx';
 
 function validateTask(task) {
     if (typeof task !== 'object' || task === null) return false;
@@ -46,28 +45,9 @@ function TaskItem({ task, onToggle, onDelete }) {
     );
 }
 
-function TaskManager({ onMaximize, isMaximized, onMinimize, index }) {
-    const [tasks, setTasks] = useState([]);
+function TaskManager({ tasks = [], setTasks = () => {}, onMaximize = () => {}, isMaximized = false }) {
     const [inputValue, setInputValue] = useState('');
     const [priority, setPriority] = useState('medium');
-
-    useEffect(() => {
-        const savedTasks = localStorage.getItem('deepdesk_tasks');
-        if (savedTasks) {
-            try {
-                const parsed = JSON.parse(savedTasks);
-                if (Array.isArray(parsed) && parsed.every(validateTask)) {
-                    setTasks(parsed);
-                }
-            } catch (e) {
-                console.error('Failed to load tasks from localStorage:', e);
-            }
-        }
-    }, []);
-
-    useEffect(() => {
-        localStorage.setItem('deepdesk_tasks', JSON.stringify(tasks));
-    }, [tasks]);
 
     const handleAdd = useCallback(() => {
         const trimmed = inputValue.trim();
@@ -103,103 +83,84 @@ function TaskManager({ onMaximize, isMaximized, onMinimize, index }) {
 
     const handleDelete = useCallback((id) => {
         setTasks((prev) => prev.filter((task) => task.id !== id));
-    }, []);
-
-    const completedCount = tasks.filter((t) => t.completed).length;
+    }, [setTasks]);
 
     return (
-        <>
-            <motion.section
-                layoutId={!isMaximized ? `taskmanager-${index}` : undefined}
-                className={`card ${isMaximized ? 'card-maximized' : ''}`}
-                id="task-manager-panel"
-                initial={!isMaximized ? { opacity: 0, y: 20 } : { opacity: 0 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: !isMaximized ? index * 0.1 : 0 }}
-            >
-                <header className="card-header">
-                    <h2 className="card-title">
-                        <span>📋</span> Task Manager
-                    </h2>
-                    <div className="card-controls">
-                        <span className="card-badge badge-green">{tasks.length} Tasks</span>
-                        <button
-                            className={`btn-maximize ${isMaximized ? 'hidden' : ''}`}
-                            onClick={onMaximize}
-                            aria-label="Maximize task manager"
-                        >
-                            ⛶
-                        </button>
-                        <button
-                            className={`btn-minimize ${!isMaximized ? 'hidden' : ''}`}
-                            onClick={onMinimize}
-                            aria-label="Minimize task manager"
-                        >
-                            ⛶
-                        </button>
-                    </div>
-                </header>
-
-                <div className="input-row mb-md">
-                    <input
-                        type="text"
-                        className="input-field"
-                        placeholder="What needs to be done?"
-                        value={inputValue}
-                        onChange={(e) => setInputValue(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        aria-label="New task text"
-                    />
-                    <select
-                        className="input-field"
-                        value={priority}
-                        onChange={(e) => setPriority(e.target.value)}
-                        aria-label="Task priority"
-                        style={{ maxWidth: '130px' }}
-                    >
-                        <option value="high">🔴 High</option>
-                        <option value="medium">🟡 Medium</option>
-                        <option value="low">🟢 Low</option>
-                    </select>
+        <motion.div
+            className={`task-manager-container ${isMaximized ? "task-manager-maximized" : ""}`}
+            initial={!isMaximized ? { opacity: 0 } : false}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+        >
+            <div className="task-header-section">
+                <h2 className="task-title">Tasks</h2>
+                {!isMaximized && (
                     <button
-                        className="btn btn-primary"
-                        onClick={handleAdd}
-                        aria-label="Add task"
+                        className="task-expand-btn"
+                        onClick={onMaximize}
+                        aria-label="Expand task manager"
                     >
-                        + Add
+                        ⤢
                     </button>
-                </div>
-
-                <div className={`task-list ${isMaximized ? 'task-list-max' : ''}`} role="list">
-                    {tasks.length === 0 ? (
-                        <div className="task-empty">
-                            <p>No tasks yet. Add one above to get started.</p>
-                        </div>
-                    ) : (
-                        tasks.map((task) => (
-                            <TaskItem
-                                key={task.id}
-                                task={task}
-                                onToggle={handleToggle}
-                                onDelete={handleDelete}
-                            />
-                        ))
-                    )}
-                </div>
-
-                {tasks.length > 0 && (
-                    <div className="task-stats">
-                        <span>{completedCount} of {tasks.length} completed</span>
-                        <span>
-                            {tasks.length - completedCount === 0
-                                ? '🎉 All done!'
-                                : `${tasks.length - completedCount} remaining`}
-                        </span>
-                    </div>
                 )}
-            </motion.section>
-            {isMaximized && <Footer />}
-        </>
+            </div>
+
+            <div className="task-input-section">
+                <input
+                    type="text"
+                    className="task-input"
+                    placeholder="Add a new task..."
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    aria-label="New task text"
+                />
+                <div className="task-priority-buttons">
+                    {['high', 'medium', 'low'].map((p) => (
+                        <button
+                            key={p}
+                            className={`task-priority-btn ${priority === p ? 'active' : ''}`}
+                            onClick={() => setPriority(p)}
+                            aria-label={`Set priority to ${p}`}
+                        >
+                            {p.charAt(0).toUpperCase()}
+                        </button>
+                    ))}
+                </div>
+                <motion.button
+                    className="task-add-btn"
+                    onClick={handleAdd}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    aria-label="Add task"
+                >
+                    +
+                </motion.button>
+            </div>
+
+            <div className={`task-list ${isMaximized ? 'task-list-max' : ''}`} role="list">
+                {tasks.length === 0 ? (
+                    <div className="task-empty">
+                        <p>No tasks yet. Add one to get started.</p>
+                    </div>
+                ) : (
+                    tasks.map((task) => (
+                        <TaskItem
+                            key={task.id}
+                            task={task}
+                            onToggle={handleToggle}
+                            onDelete={handleDelete}
+                        />
+                    ))
+                )}
+            </div>
+
+            {tasks.length > 0 && (
+                <div className="task-stats">
+                    <span>{tasks.filter(t => t.completed).length} of {tasks.length} done</span>
+                </div>
+            )}
+        </motion.div>
     );
 }
 

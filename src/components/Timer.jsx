@@ -65,7 +65,7 @@ export default function Timer({
       transition={{ duration: 0.3 }}
     >
       <div className="timer-header-section">
-        <h2 className="timer-title">⏱ Pomodoro</h2>
+        <h2 className="timer-title">Pomodoro</h2>
         {!isMaximized && (
           <button
             className="timer-expand-btn"
@@ -155,7 +155,7 @@ export default function Timer({
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          {isRunning ? "⏸ Pause" : "▶ Start"}
+          {isRunning ? "Pause" : "Start"}
         </motion.button>
         <motion.button
           className="timer-btn-reset"
@@ -163,7 +163,7 @@ export default function Timer({
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          ↻ Reset
+          Reset
         </motion.button>
       </div>
 
