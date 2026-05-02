@@ -6,7 +6,6 @@ import Timer from "./components/Timer.jsx";
 import TaskManager from "./components/TaskManager.jsx";
 import Whiteboard from "./components/Whiteboard.jsx";
 import VisionBoard from "./components/VisionBoard.jsx";
-import FloatingSoundscape from "./components/FloatingSoundscape.jsx";
 
 const POMODORO_PRESETS = [
   { label: "Pomodoro", minutes: 25, seconds: 0 },
@@ -240,8 +239,6 @@ export default function App() {
           )}
         </motion.main>
       </AnimatePresence>
-
-      <FloatingSoundscape />
 
       <footer className="deepdesk-footer">
         <span className="footer-text">Built by Yuvraj Chopra</span>
